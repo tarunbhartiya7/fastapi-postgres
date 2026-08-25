@@ -11,7 +11,7 @@ def get_tasks(db: Session):
 
 
 def get_task(task_id: int, db: Session):
-    task = db.query(TaskModel).filter(TaskModel.id == task_id).first()
+    task = db.query(TaskModel).get(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"task": task}
