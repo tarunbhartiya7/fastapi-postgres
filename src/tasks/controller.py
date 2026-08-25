@@ -23,3 +23,22 @@ def create_task(body: TaskSchema, db: Session):
     db.commit()
     db.refresh(task)
     return {"task": task}
+
+
+def update_task(task_id: int, body: TaskSchema, db: Session):
+    task = db.query(TaskModel).get(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    for key, value in body.model_dump().items():
+        setattr(task, key, value)
+    db.commit()
+    db.refresh(task)
+    return {"task": task}
+
+
+def delete_task(task_id: int, db: Session):
+    task = db.query(TaskModel).get(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    db.delete(task)
+    db.commit()
