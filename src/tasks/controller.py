@@ -5,15 +5,20 @@ from src.tasks.dtos import TaskSchema
 from src.tasks.models import TaskModel
 
 
+def _get_task_or_404(task_id: int, db: Session) -> TaskModel:
+    task = db.get(TaskModel, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
+
+
 def get_tasks(db: Session):
     tasks = db.query(TaskModel).all()
     return {"tasks": tasks}
 
 
 def get_task(task_id: int, db: Session):
-    task = db.query(TaskModel).get(task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
+    task = _get_task_or_404(task_id, db)
     return {"task": task}
 
 
@@ -26,9 +31,7 @@ def create_task(body: TaskSchema, db: Session):
 
 
 def update_task(task_id: int, body: TaskSchema, db: Session):
-    task = db.query(TaskModel).get(task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
+    task = _get_task_or_404(task_id, db)
     for key, value in body.model_dump().items():
         setattr(task, key, value)
     db.commit()
@@ -37,8 +40,6 @@ def update_task(task_id: int, body: TaskSchema, db: Session):
 
 
 def delete_task(task_id: int, db: Session):
-    task = db.query(TaskModel).get(task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
+    task = _get_task_or_404(task_id, db)
     db.delete(task)
     db.commit()
